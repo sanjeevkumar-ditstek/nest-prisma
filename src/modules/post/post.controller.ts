@@ -22,7 +22,7 @@ export class PostController {
    */
   @Get(':id')
   async getPostById(@Param('id') id: string): Promise<PostModel> {
-    return this.postService.post({ id: id });
+    return this.postService.findByAttribute({ id: id });
   }
 
   /**

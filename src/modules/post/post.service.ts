@@ -11,13 +11,21 @@ export class PostService {
 
   private logger = new Logger('Posts service');
 
-  async post(
+  /**
+   * @description Function to get post by attribute
+   * @param postWhereUniqueInput
+   * @returns
+   */
+  async findByAttribute(
     postWhereUniqueInput: Prisma.PostWhereUniqueInput,
   ): Promise<Post | null> {
     this.logger.log('postById');
     try {
       const post = await this.prisma.post.findUnique({
         where: postWhereUniqueInput,
+        include: {
+          author: true, // Assuming your relation field is called `author`
+        },
       });
       if (!post) {
         throw createCustomError('Post not found', HttpStatus.NOT_FOUND);
@@ -31,6 +39,11 @@ export class PostService {
     }
   }
 
+  /**
+   * @description Function to search post
+   * @param params
+   * @returns
+   */
   async posts(params: {
     where?: Prisma.PostWhereInput;
     orderBy?: Prisma.PostOrderByWithRelationInput;
@@ -40,6 +53,9 @@ export class PostService {
       const posts = await this.prisma.post.findMany({
         where: params.where,
         orderBy: params.orderBy,
+        include: {
+          author: true, // Assuming your relation field is called `author`
+        },
       });
       return plainToInstance(PostsDto, posts);
     } catch (e) {
@@ -49,11 +65,19 @@ export class PostService {
       );
     }
   }
+
+  /**
+   * @description Funtion to get published posts
+   * @returns
+   */
   async getPublishedPosts(): Promise<Post[]> {
     this.logger.log('getPublishedPosts');
     try {
       const publishedPosts = await this.prisma.post.findMany({
         where: { published: true },
+        include: {
+          author: true, // Assuming your relation field is called `author`
+        },
       });
       return plainToInstance(PostsDto, publishedPosts);
     } catch (e) {
@@ -64,6 +88,11 @@ export class PostService {
     }
   }
 
+  /**
+   * @description Function to create new post
+   * @param data
+   * @returns
+   */
   async createPost(data: Prisma.PostCreateInput): Promise<Post> {
     this.logger.log('createPost');
     try {
@@ -79,6 +108,11 @@ export class PostService {
     }
   }
 
+  /**
+   * @description Function to update post
+   * @param params
+   * @returns
+   */
   async updatePost(params: {
     where: Prisma.PostWhereUniqueInput;
     data: Prisma.PostUpdateInput;
@@ -99,6 +133,11 @@ export class PostService {
     }
   }
 
+  /**
+   * @description Function to delete post
+   * @param where
+   * @returns
+   */
   async deletePost(where: Prisma.PostWhereUniqueInput): Promise<Post> {
     this.logger.log('deletePost');
     try {
